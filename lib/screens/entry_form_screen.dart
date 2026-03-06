@@ -157,42 +157,50 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     );
   }
 
-  void _showInternalMaterialpicker() async {
-    final TextEditingController _newMaterialController =
-        TextEditingController();
-    await showDialog(context: context, builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            title: const Text("Select Internal Materials"),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(child: TextField(
-                        controller: _newMaterialController,
-                        decoration: const InputDecoration(
-                          hintText: "New material name...",
-                          isDense: true
+  void _showInternalMaterialPicker() async {
+    final TextEditingController newMaterialController = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text("Select Internal Materials"),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: newMaterialController,
+                            decoration: const InputDecoration(
+                              hintText: "New material name...",
+                              isDense: true,
+                            ),
+                          ),
                         ),
-                      ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          String newItem = _newMaterialController.text.trim();
-                        }, 
-                        icon: const Icon(Icons.add_circle, color: Colors.blue))
-
-                  ],)
-                ],
+                        IconButton(
+                          onPressed: () {
+                            String newItem = newMaterialController.text.trim();
+                          },
+                          icon: const Icon(
+                            Icons.add_circle,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          )
-        })
-    });
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _pickPhoto() async {

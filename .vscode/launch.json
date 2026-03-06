@@ -14,7 +14,7 @@
             "name": "Flutter: Physical Phone Wireless",
             "request": "launch",
             "type": "dart",
-            "deviceId": "192.168.1.32:42211" // Replace with your phone's ID
+            "deviceId": "10.140.126.97:38685" // Replace with your phone's ID
         },
         {
             "name": "Flutter: Emulator",
