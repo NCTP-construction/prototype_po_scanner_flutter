@@ -23,14 +23,20 @@ class ExternalWorker {
 }
 
 // External Equipment class
-class ExternalEquipment {
-  String engineName;
-  String renterName;
+class Equipment {
+  String equipmentName;
+  bool isInternal; // true for internal, false for external
+  String? renterName;
 
-  ExternalEquipment({required this.engineName, required this.renterName});
+  Equipment({
+    required this.equipmentName,
+    this.isInternal = true,
+    this.renterName,
+  });
 
   Map<String, dynamic> toJson() => {
-    'engine_name': engineName,
+    'equipment_name': equipmentName,
+    'is_internal': isInternal,
     'renter_name': renterName,
   };
 }
@@ -60,6 +66,8 @@ class TransportLog {
   );
 }
 
+
+
 // Main Report Model
 class DailyReportModel {
   // Metadata
@@ -77,7 +85,8 @@ class DailyReportModel {
 
   // Lists of Objects (Complex)
   List<ExternalWorker> externalManpower;
-  List<ExternalEquipment> externalMaterials;
+  List<Equipment> equipments;
+  List<Map<String, dynamic>> consumableMaterials; // ex: [{"material": "Cement", "quantity": 50, "unit": "bags"}]
   List<TransportLog> transportLogs;
 
   DailyReportModel({
@@ -90,7 +99,8 @@ class DailyReportModel {
     this.miscTools = const [],
     this.miscWork = const [],
     this.externalManpower = const [],
-    this.externalMaterials = const [],
+    this.equipments = const [],
+    this.consumableMaterials = const [],
     this.transportLogs = const [],
     this.imagePaths = const [],
   });
@@ -103,8 +113,8 @@ class DailyReportModel {
       'climate': climate.name, // Saves as "soleil", "mitige", etc.
       'internal_manpower': internalManpower,
       'external_manpower': externalManpower.map((e) => e.toJson()).toList(),
-      'internal_materials': internalMaterials,
-      'external_materials': externalMaterials.map((e) => e.toJson()).toList(),
+      'equipments': equipments.map((e) => e.toJson()).toList(),
+      'consumable_materials': consumableMaterials,
       'transport_logs': transportLogs.map((e) => e.toJson()).toList(),
       'misc_tools': miscTools,
       'misc_work': miscWork,

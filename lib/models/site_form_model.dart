@@ -1,10 +1,13 @@
+import 'daily_report_model.dart';
+
 class SiteFormModel {
   String siteName;
   DateTime date;
   String author;
   List<String> internalEmployees;
   List<String> externalWorkers;
-  List<Map<String, dynamic>> materials;
+  List<Equipment> equipments;
+  List<Map<String, dynamic>> consumableMaterials; // ex: [{"material": "Cement", "quantity": 50, "unit": "bags"}]
 
   SiteFormModel({
     this.siteName = '',
@@ -12,6 +15,7 @@ class SiteFormModel {
     this.author = '',
     this.internalEmployees = const [],
     this.externalWorkers = const [],
-    this.materials = const [],
+    this.equipments = const [],
+    this.consumableMaterials = const [],
   });
 }

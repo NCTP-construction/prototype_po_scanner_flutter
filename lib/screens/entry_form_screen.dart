@@ -157,52 +157,63 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     );
   }
 
-  void _showInternalMaterialPicker() async {
-    final TextEditingController newMaterialController = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text("Select Internal Materials"),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: newMaterialController,
-                            decoration: const InputDecoration(
-                              hintText: "New material name...",
-                              isDense: true,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            String newItem = newMaterialController.text.trim();
-                          },
-                          icon: const Icon(
-                            Icons.add_circle,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+  void _addEquipment() async {
+    final result = await showDialog<Equipment>(
+      context: context, builder: (context) {
+        String name = '';
+        bool isInternal = true;
+        String renter = '';
+
+        return StatefulBuilder(builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text("Add Equipment/Machine"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: const InputDecoration(labelText: "Equipment Name"),
+                  onChanged: (val) => name = val,
                 ),
+                SwitchListTile(
+                  title: const Text("Is this an internal machine?"),
+                  value: isInternal,
+                  onChanged: (val) {
+                    setDialogState(() => isInternal = val);
+                  },
+                ),
+                if (!isInternal)
+                  TextField(
+                    decoration: const InputDecoration(labelText: "Renter Name"),
+                    onChanged: (val) => renter = val,
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("CANCEL"),
               ),
-            );
-          },
-        );
-      },
+              ElevatedButton(
+                onPressed: () {
+                  if (name.isNotEmpty) {
+                    Navigator.pop(
+                      context,
+                      Equipment(
+                        equipmentName: name,
+                        isInternal: isInternal,
+                        renterName: isInternal ? null : renter,
+                      ),
+                    );
+                  }
+                },
+                child: const Text("ADD"),
+              ),
+            ],
+          );
+        })
+      }
     );
   }
-
   Future<void> _pickPhoto() async {
     final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
     if (photo != null) {
@@ -364,9 +375,59 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             ),
 
             const SizedBox(height: 40),
-            const Text(
-              "Materials",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Column(
+              children: _formData.equipments.map((equipment) {
+                return Card(
+                  elevation: 0,
+                  color: equipment.isInternal
+                      ? Colors.blue.withOpacity(0.05)
+                      : Colors.orange.withOpacity(0.05),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.precision_manufacturing,
+                      color: equipment.isInternal ? Colors.blue : Colors.orange,
+                    ),
+                    title: Text(
+                      equipment.equipmentName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      equipment.isInternal
+                          ? "Internal Property"
+                          : "Rented from: ${equipment.renterName ?? "Unknown"}",
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(
+                        Icons.remove_circle_outline,
+                        color: Colors.red,
+                      ),
+                      onPressed: () =>
+                          setState(() => _formData.equipments.remove(equipment)),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            OutlinedButton.icon(
+              onPressed: _addEquipment, // Method from previous step
+              icon: const Icon(Icons.add_outlined),
+              label: const Text("Add Machine (Internal/Rented)"),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(45),
+              ),
+            ),
+
+const Divider(height: 40),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                "Engines & Machinery",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
 
             const Divider(height: 40),
