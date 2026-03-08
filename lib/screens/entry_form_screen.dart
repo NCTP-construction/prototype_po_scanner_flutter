@@ -159,61 +159,106 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
 
   void _addEquipment() async {
     final result = await showDialog<Equipment>(
-      context: context, builder: (context) {
+      context: context,
+      builder: (context) {
         String name = '';
         bool isInternal = true;
         String renter = '';
 
-        return StatefulBuilder(builder: (context, setDialogState) {
-          return AlertDialog(
-            title: const Text("Add Equipment/Machine"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  decoration: const InputDecoration(labelText: "Equipment Name"),
-                  onChanged: (val) => name = val,
-                ),
-                SwitchListTile(
-                  title: const Text("Is this an internal machine?"),
-                  value: isInternal,
-                  onChanged: (val) {
-                    setDialogState(() => isInternal = val);
-                  },
-                ),
-                if (!isInternal)
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text("Add Equipment/ Machine"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   TextField(
-                    decoration: const InputDecoration(labelText: "Renter Name"),
-                    onChanged: (val) => renter = val,
+                    decoration: const InputDecoration(
+                      labelText: "Equipment Name",
+                    ),
+                    onChanged: (val) => name = val,
                   ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("CANCEL"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (name.isNotEmpty) {
-                    Navigator.pop(
-                      context,
-                      Equipment(
-                        equipmentName: name,
-                        isInternal: isInternal,
-                        renterName: isInternal ? null : renter,
+                  SwitchListTile(
+                    title: const Text("Is this an internal machine?"),
+                    value: isInternal,
+                    onChanged: (val) {
+                      setDialogState(() => isInternal = val);
+                    },
+                  ),
+                  if (!isInternal)
+                    TextField(
+                      decoration: const InputDecoration(
+                        labelText: "Renter Name",
                       ),
-                    );
-                  }
-                },
-                child: const Text("ADD"),
+                      onChanged: (val) => renter = val,
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("CANCEL"),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(
+                    context,
+                    Equipment(
+                      equipmentName: name,
+                      isInternal: isInternal,
+                      renterName: isInternal ? null : renter,
+                    ),
+                  ),
+                  child: const Text("ADD"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    if (result != null) {
+      setState(() {
+        _formData.equipments = [..._formData.equipments, result];
+      });
+    }
+  }
+
+  void _addMaterials() async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        String materials = '';
+        return AlertDialog(
+          title: const Text("Add Materials"),
+          content: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: const InputDecoration(labelText: "Materials"),
+                  onChanged: (value) => materials = value,
+                ),
               ),
             ],
-          );
-        })
-      }
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, materials),
+              child: const Text("ADD"),
+            ),
+          ],
+        );
+      },
     );
+    if (result != null && result.isNotEmpty) {
+      setState(() {
+        _formData.consumableMaterials = [
+          ..._formData.consumableMaterials,
+          result,
+        ];
+      });
+    }
   }
+
   Future<void> _pickPhoto() async {
     final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
     if (photo != null) {
@@ -338,7 +383,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               icon: const Icon(Icons.person_search),
               label: const Text("Select Employees"),
             ),
-
+            const SizedBox(height: 20),
             // External Manpower input
             // Title
             const Text(
@@ -373,8 +418,13 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               icon: const Icon(Icons.add),
               label: const Text("Add External Worker"),
             ),
-
-            const SizedBox(height: 40),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                "Engines & Machinery",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
             Column(
               children: _formData.equipments.map((equipment) {
                 return Card(
@@ -405,28 +455,21 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                         Icons.remove_circle_outline,
                         color: Colors.red,
                       ),
-                      onPressed: () =>
-                          setState(() => _formData.equipments.remove(equipment)),
+                      onPressed: () => setState(
+                        () => _formData.equipments.remove(equipment),
+                      ),
                     ),
                   ),
                 );
               }).toList(),
             ),
+
             OutlinedButton.icon(
               onPressed: _addEquipment, // Method from previous step
               icon: const Icon(Icons.add_outlined),
               label: const Text("Add Machine (Internal/Rented)"),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(45),
-              ),
-            ),
-
-const Divider(height: 40),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: Text(
-                "Engines & Machinery",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
 

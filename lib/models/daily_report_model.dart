@@ -66,8 +66,6 @@ class TransportLog {
   );
 }
 
-
-
 // Main Report Model
 class DailyReportModel {
   // Metadata
@@ -82,11 +80,12 @@ class DailyReportModel {
   List<String> miscTools;
   List<String> miscWork;
   List<String> imagePaths;
+  List<String> consumableMaterials;
 
   // Lists of Objects (Complex)
   List<ExternalWorker> externalManpower;
   List<Equipment> equipments;
-  List<Map<String, dynamic>> consumableMaterials; // ex: [{"material": "Cement", "quantity": 50, "unit": "bags"}]
+
   List<TransportLog> transportLogs;
 
   DailyReportModel({
