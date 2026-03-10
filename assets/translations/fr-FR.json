@@ -1,0 +1,23 @@
+{
+    "site_list_title": "Sites constructions",
+    "report_title": "Rapport Journalier",
+    "sections": {
+        "engines": "Engins & Machines",
+        "materials": "Matériaux",
+        "transport": "Transports",
+        "worker_name": "Nom d'employé",
+        "agency_name": "Nom d'agence",
+        "hours_worked": "heures travailés"
+    },
+    "button": {
+        "add_engine": "Ajouter une machine",
+        "add_material": "Ajouter un Matériel",
+        "add_external_worker": "Ajouter un employé externe",
+        "save": "Enregistrer le Rapport"
+    },
+    "switch_lang": "Passer à l'Anglais",
+    "placeholders": {
+        "no_materials": "Aucun matériaux ajoutés.",
+        "no_sites": "Aucun sites rempli trouvés, appuyez sur + pour remplir un site."
+    }
+}

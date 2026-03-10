@@ -1,0 +1,17 @@
+{
+    "title": "Site report",
+    "sections": {
+        "engines": "Machines & Engines",
+        "materials": "Materiels",
+        "transport": "Transports"
+    },
+    "button": {
+        "add_engine": "Add a machine",
+        "add_material": "Add a material",
+        "save": "Save report"
+    },
+    "switch_lang": "Switch to French",
+    "placeholders": {
+        "no_materials": "No materials added."
+    }
+}

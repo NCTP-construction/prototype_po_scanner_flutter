@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prototype_po_scanner/screens/entry_form_screen.dart';
 import '../models/site_model.dart';
 import '../widgets/site_card.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SiteListPage extends StatelessWidget {
   SiteListPage({super.key});
@@ -33,11 +34,11 @@ class SiteListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Construction Sites"),
+        title: Text("site_list_title".tr()),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: sites.isEmpty
-          ? const Center(child: Text("No forms filled yet. Tap + to start."))
+          ? Center(child: Text("no_sites".tr()))
           : ListView.builder(
               itemCount: sites.length,
               itemBuilder: (context, index) {

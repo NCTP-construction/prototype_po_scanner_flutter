@@ -39,6 +39,7 @@ dependencies:
   path_provider: ^2.1.2
   path: ^1.9.0
   sqflite: ^2.3.0
+  easy_localization: ^3.0.7
   
 
 dev_dependencies:
@@ -62,6 +63,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+      - assets/translations/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

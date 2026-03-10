@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:prototype_po_scanner/models/daily_report_model.dart';
 import 'package:prototype_po_scanner/models/user_model.dart';
 import 'package:prototype_po_scanner/services/image_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class EntryFormScreen extends StatefulWidget {
   const EntryFormScreen({super.key});
@@ -224,39 +225,45 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
   }
 
   void _addMaterials() async {
-    final result = await showDialog<String>(
+    final TextEditingController _controller = TextEditingController();
+
+    await showDialog(
       context: context,
       builder: (context) {
-        String materials = '';
         return AlertDialog(
-          title: const Text("Add Materials"),
-          content: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: const InputDecoration(labelText: "Materials"),
-                  onChanged: (value) => materials = value,
-                ),
-              ),
-            ],
+          title: const Text("Add Material"),
+          content: TextField(
+            controller: _controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: "e.g., Cement, Sand, Gravel...",
+              labelText: "Material Name",
+            ),
           ),
           actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context, materials),
+              onPressed: () {
+                String name = _controller.text.trim();
+                if (name.isNotEmpty) {
+                  setState(() {
+                    _formData.consumableMaterials = [
+                      ..._formData.consumableMaterials,
+                      name,
+                    ];
+                  });
+                  Navigator.pop(context);
+                }
+              },
               child: const Text("ADD"),
             ),
           ],
         );
       },
     );
-    if (result != null && result.isNotEmpty) {
-      setState(() {
-        _formData.consumableMaterials = [
-          ..._formData.consumableMaterials,
-          result,
-        ];
-      });
-    }
   }
 
   Future<void> _pickPhoto() async {
@@ -473,6 +480,79 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               ),
             ),
 
+            // ========= CONSTRUCTION MATERIALS =========
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                "Materials",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: _formData.consumableMaterials.isEmpty
+                  ? [
+                      Text(
+                        "placeholders.no_materials".tr(),
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ]
+                  : _formData.consumableMaterials.map((item) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              " • ",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                item,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                            // Tiny delete button for editing
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _formData.consumableMaterials = _formData
+                                      .consumableMaterials
+                                      .where((m) => m != item)
+                                      .toList();
+                                });
+                              },
+                              child: const Icon(
+                                Icons.close,
+                                size: 18,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+            ),
+            const SizedBox(height: 12),
+
+            // Button to trigger the simplified dialog
+            OutlinedButton.icon(
+              onPressed: _addMaterials,
+              icon: const Icon(Icons.playlist_add),
+              label: const Text("Add Materials (Free Text)"),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(45),
+              ),
+            ),
+
+            // ========= END CONSTRUCTION MATERIALS =========
             const Divider(height: 40),
             const Text(
               "Site Photos & POs",
