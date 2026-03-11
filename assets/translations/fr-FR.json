@@ -1,23 +1,68 @@
 {
     "site_list_title": "Sites constructions",
-    "report_title": "Rapport Journalier",
-    "sections": {
-        "engines": "Engins & Machines",
-        "materials": "Matériaux",
-        "transport": "Transports",
-        "worker_name": "Nom d'employé",
-        "agency_name": "Nom d'agence",
-        "hours_worked": "heures travailés"
+    
+    "report": {
+        "new_report": "Nouveau Rapport de Chantier",
+        "enter_site_name": "Entrez le nom du site",
+        "site_name": "Nom du site",
+        "date": "Date",
+        "climate": {
+            "title": "Climat",
+            "sunny": "Ensoleillé",
+            "rainy": "Pluvieux",
+            "snowy": "Neigeux",
+            "windy": "Venteux",
+            "foggy": "Brumeux",
+            "mild": "Doux"
+        },
+        "sections": {
+            "resources": {
+                "title": "Ressources",
+                "manpower_internal": {
+                    "title": "Main d'œuvre - Interne (employés)",
+                    "select_internal_employees": "Sélectionner les employés"
+                },
+                "manpower_external": {
+                    "title": "Main d'œuvre - Externe (sous-traitants)",
+                    "add_external_worker": "Ajouter un Employé Externe",
+                    "worker_name": "Nom d'employé",
+                    "agency_name": "Nom d'agence",
+                    "hours_worked": "heures travailés"
+                },
+                "Equipment": {
+                    "title": "Équipement / Machines",
+                    "add_engine": "Ajouter un équipment / une machine",
+                    "internal_property": "Équipement Interne",
+                    "rented_from": "Loué de",
+                    "unknown": "Inconnu",
+                    "internal_machine_title": "Est-ce une machine interne ?",
+                    "renter_name": "Nom du loueur"
+                    
+                },
+                "Materials": {
+                    "title": "Matériaux",
+                    "add_material": "Ajouter un Matériel",
+                    "description" : "Description",
+                    "no_materials": "Aucun matériaux ajoutés.",
+                    "materials_hint": "ex: Ciment, Sable, Gravier..."
+                }
+            }
+        }
     },
     "button": {
-        "add_engine": "Ajouter une machine",
-        "add_material": "Ajouter un Matériel",
-        "add_external_worker": "Ajouter un employé externe",
-        "save": "Enregistrer le Rapport"
+        "add": "Ajouter",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "done": "Terminé"
+    },
+    "messages":{
+        "report_saved": "Rapport enregistré avec succès !",
+        "report_save_error": "Erreur lors de l'enregistrement du rapport. Veuillez réessayer.",
+        "processing_data": "Traitement des données en cours..."
     },
     "switch_lang": "Passer à l'Anglais",
     "placeholders": {
-        "no_materials": "Aucun matériaux ajoutés.",
+        
         "no_sites": "Aucun sites rempli trouvés, appuyez sur + pour remplir un site."
     }
 }

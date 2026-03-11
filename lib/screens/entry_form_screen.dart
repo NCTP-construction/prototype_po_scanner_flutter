@@ -37,7 +37,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     _formData = DailyReportModel(
       date: DateTime.now(),
       author: User(userId: "1", username: 'tifaky', fullName: "tifaky"),
-      siteName: "Enter Site Name",
+      siteName: "report.sections.resources.manpower_external.site_name".tr(),
     );
   }
 
@@ -51,20 +51,20 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
         int hours = 0;
 
         return AlertDialog(
-          title: const Text("Add Agency Worker"),
+          title:  Text("report.sections.resources.manpower_external.add_external_worker".tr()),
           content: Column(
             mainAxisSize: MainAxisSize.min, // Shrink to fit content
             children: [
               TextField(
-                decoration: const InputDecoration(labelText: "Worker Name"),
+                decoration: InputDecoration(labelText: "report.sections.resources.manpower_external.worker_name".tr()),
                 onChanged: (val) => name = val,
               ),
               TextField(
-                decoration: const InputDecoration(labelText: "Agency Name"),
+                decoration: InputDecoration(labelText: "report.sections.resources.manpower_external.agency_name".tr()),
                 onChanged: (val) => agency = val,
               ),
               TextField(
-                decoration: const InputDecoration(labelText: "Hours Worked"),
+                decoration: InputDecoration(labelText: "report.sections.resources.manpower_external.hours_worked".tr()),
                 keyboardType: TextInputType.number,
                 onChanged: (val) => hours = int.tryParse(val) ?? 0,
               ),
@@ -73,7 +73,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("CANCEL"),
+              child:  Text("button.cancel".tr()),
             ),
             ElevatedButton(
               onPressed: () {
@@ -89,7 +89,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                   );
                 }
               },
-              child: const Text("ADD"),
+              child:  Text("button.add".tr()),
             ),
           ],
         );
@@ -111,7 +111,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text("Select Internal Workers"),
+              title:  Text("report.sections.resources.manpower_internal.select_internal_employees".tr()),
               content: SizedBox(
                 width: double.maxFinite,
                 child: ListView.builder(
@@ -148,7 +148,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("DONE"),
+                  child:  Text("button.done".tr()),
                 ),
               ],
             );
@@ -169,18 +169,18 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text("Add Equipment/ Machine"),
+              title:  Text("report.sections.resources.equipment.add_equipment".tr()),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
-                    decoration: const InputDecoration(
-                      labelText: "Equipment Name",
+                    decoration: InputDecoration(
+                      labelText: "report.sections.resources.equipment.equipment_name".tr(),
                     ),
                     onChanged: (val) => name = val,
                   ),
                   SwitchListTile(
-                    title: const Text("Is this an internal machine?"),
+                    title: Text("report.sections.resources.equipment.internal_machine_title".tr()),
                     value: isInternal,
                     onChanged: (val) {
                       setDialogState(() => isInternal = val);
@@ -188,8 +188,8 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                   ),
                   if (!isInternal)
                     TextField(
-                      decoration: const InputDecoration(
-                        labelText: "Renter Name",
+                      decoration: InputDecoration(
+                        labelText: "report.sections.resources.equipment.renter_name".tr(),
                       ),
                       onChanged: (val) => renter = val,
                     ),
@@ -198,7 +198,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("CANCEL"),
+                  child: Text("button.cancel".tr()),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(
@@ -209,7 +209,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                       renterName: isInternal ? null : renter,
                     ),
                   ),
-                  child: const Text("ADD"),
+                  child:  Text("button.add".tr()),
                 ),
               ],
             );
@@ -231,19 +231,19 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Add Material"),
+          title:  Text("report.sections.resources.materials.add_material".tr()),
           content: TextField(
             controller: _controller,
             autofocus: true,
-            decoration: const InputDecoration(
-              hintText: "e.g., Cement, Sand, Gravel...",
-              labelText: "Material Name",
+            decoration: InputDecoration(
+              hintText: "report.sections.resources.materials.materials_hint".tr(),
+              labelText: "report.sections.resources.materials.description".tr(),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
+              child: Text("button.cancel".tr()),
             ),
             ElevatedButton(
               onPressed: () {
@@ -258,7 +258,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                   Navigator.pop(context);
                 }
               },
-              child: const Text("ADD"),
+              child:  Text("button.add".tr()),
             ),
           ],
         );
@@ -281,7 +281,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
       _formKey.currentState!.save();
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Processing Data...')));
+      ).showSnackBar(SnackBar(content: Text('messages.processing_data'.tr())));
     }
   }
 
@@ -289,7 +289,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("New Daily Report")),
+      appBar: AppBar(title: Text("report.new_report".tr())),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -297,12 +297,12 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
           children: [
             // Site name
             TextFormField(
-              decoration: const InputDecoration(
-                labelText: 'Site Name',
+              decoration: InputDecoration(
+                labelText: 'report.site_name'.tr(),
                 border: OutlineInputBorder(),
               ),
               validator: (value) =>
-                  value!.isEmpty ? 'Please enter site name' : null,
+                  value!.isEmpty ? 'report.enter_site_name'.tr() : null,
               onSaved: (value) => _formData.siteName = value!,
             ),
             const SizedBox(height: 16), // Blank Divider
@@ -313,7 +313,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.calendar_today),
-                    title: const Text("Date"),
+                    title: Text("report.date".tr()),
                     subtitle: Text(
                       "${_formData.date.day}/${_formData.date.month}/${_formData.date.year}",
                     ),
@@ -334,16 +334,15 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                 Expanded(
                   child: DropdownButtonFormField<WeatherCondition>(
                     initialValue: _formData.climate,
-                    decoration: const InputDecoration(
-                      labelText: "Climate",
+                    decoration: InputDecoration(
+                      labelText: "report.climate.title".tr(),
                       border: UnderlineInputBorder(),
                     ),
                     items: WeatherCondition.values.map((weather) {
                       return DropdownMenuItem(
                         value: weather,
                         child: Text(
-                          weather.name[0].toUpperCase() +
-                              weather.name.substring(1),
+                          weather.translatedName,
                         ),
                       );
                     }).toList(),
@@ -357,15 +356,15 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             const Divider(height: 40),
 
             // Resources (Materials and Manpower)
-            const Text(
-              "Resources",
+             Text(
+              "report.sections.resources.title".tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10), // Blank Divider
             // Internal Manpower input
             // Title
-            const Text(
-              "Manpower - Internal",
+            Text(
+              "report.sections.resources.manpower_internal.title".tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10), // Blank Divider
@@ -388,13 +387,13 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             OutlinedButton.icon(
               onPressed: _showInternalWorkerPicker,
               icon: const Icon(Icons.person_search),
-              label: const Text("Select Employees"),
+              label: Text("report.sections.resources.manpower_internal.select_internal_employees".tr()),
             ),
             const SizedBox(height: 20),
             // External Manpower input
             // Title
-            const Text(
-              "Manpower - External (Agency)",
+            Text(
+              "report.sections.resources.manpower_external.title".tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10), // Blank Divider
@@ -423,12 +422,12 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             OutlinedButton.icon(
               onPressed: _addExternalWorker,
               icon: const Icon(Icons.add),
-              label: const Text("Add External Worker"),
+              label: Text("report.sections.resources.manpower_external.add_external_worker".tr()),
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                "Engines & Machinery",
+                "report.sections.resources.Equipment.title".tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
@@ -454,7 +453,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                     ),
                     subtitle: Text(
                       equipment.isInternal
-                          ? "Internal Property"
+                          ? "report.sections.resources.Equipment.internal_property".tr()
                           : "Rented from: ${equipment.renterName ?? "Unknown"}",
                     ),
                     trailing: IconButton(
@@ -474,17 +473,17 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             OutlinedButton.icon(
               onPressed: _addEquipment, // Method from previous step
               icon: const Icon(Icons.add_outlined),
-              label: const Text("Add Machine (Internal/Rented)"),
+              label: Text("report.sections.resources.Equipment.add_engine".tr()),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(45),
               ),
             ),
 
             // ========= CONSTRUCTION MATERIALS =========
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                "Materials",
+                "report.sections.resources.Materials.title".tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
@@ -493,7 +492,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               children: _formData.consumableMaterials.isEmpty
                   ? [
                       Text(
-                        "placeholders.no_materials".tr(),
+                        "report.sections.resources.Materials.no_materials".tr(),
                         style: TextStyle(
                           color: Colors.grey,
                           fontStyle: FontStyle.italic,
@@ -546,7 +545,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             OutlinedButton.icon(
               onPressed: _addMaterials,
               icon: const Icon(Icons.playlist_add),
-              label: const Text("Add Materials (Free Text)"),
+              label: Text("report.sections.resources.Materials.add_material".tr()),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(45),
               ),
@@ -614,7 +613,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
               ),
-              child: const Text("SUBMIT REPORT"),
+              child: Text("button.save".tr()),
             ),
           ],
         ),

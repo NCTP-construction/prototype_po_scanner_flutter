@@ -1,7 +1,21 @@
 import '../models/user_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 // Climate options
 enum WeatherCondition { sunny, mild, rainy }
+
+extension WeatherConditionExtension on WeatherCondition {
+  String get translatedName {
+    switch (this) {
+      case WeatherCondition.sunny:
+        return 'report.climate.sunny'.tr();
+      case WeatherCondition.mild:
+        return 'report.climate.mild'.tr();
+      case WeatherCondition.rainy:
+        return 'report.climate.rainy'.tr();
+    }
+  }
+}
 
 // External worker sub-objects
 class ExternalWorker {
