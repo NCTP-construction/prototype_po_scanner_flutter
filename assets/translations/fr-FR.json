@@ -29,7 +29,7 @@
                     "agency_name": "Nom d'agence",
                     "hours_worked": "heures travailés"
                 },
-                "Equipment": {
+                "equipment": {
                     "title": "Équipement / Machines",
                     "add_engine": "Ajouter un équipment / une machine",
                     "internal_property": "Équipement Interne",
@@ -39,13 +39,16 @@
                     "renter_name": "Nom du loueur"
                     
                 },
-                "Materials": {
+                "materials": {
                     "title": "Matériaux",
                     "add_material": "Ajouter un Matériel",
                     "description" : "Description",
                     "no_materials": "Aucun matériaux ajoutés.",
                     "materials_hint": "ex: Ciment, Sable, Gravier..."
                 }
+            },
+            "transport": {
+                
             }
         }
     },

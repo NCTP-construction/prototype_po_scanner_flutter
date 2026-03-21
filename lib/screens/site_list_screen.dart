@@ -36,6 +36,18 @@ class SiteListPage extends StatelessWidget {
       appBar: AppBar(
         title: Text("site_list_title".tr()),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language),
+            onPressed: () {
+              if (context.locale.languageCode == 'fr') {
+                context.setLocale(const Locale('en', 'US'));
+              } else {
+                context.setLocale(const Locale('fr', 'FR'));
+              }
+            },
+          ),
+        ],
       ),
       body: sites.isEmpty
           ? Center(child: Text("no_sites".tr()))

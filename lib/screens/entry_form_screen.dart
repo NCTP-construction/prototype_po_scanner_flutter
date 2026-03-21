@@ -23,7 +23,8 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     "Esteban Ocon",
     "Lucas Bernard",
   ];
-
+  // List<TransportLog> _transportLogs = [];
+  // List<String> _materials = [];
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
   final ImageService _imageService = ImageService();
@@ -51,20 +52,35 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
         int hours = 0;
 
         return AlertDialog(
-          title:  Text("report.sections.resources.manpower_external.add_external_worker".tr()),
+          title: Text(
+            "report.sections.resources.manpower_external.add_external_worker"
+                .tr(),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min, // Shrink to fit content
             children: [
               TextField(
-                decoration: InputDecoration(labelText: "report.sections.resources.manpower_external.worker_name".tr()),
+                decoration: InputDecoration(
+                  labelText:
+                      "report.sections.resources.manpower_external.worker_name"
+                          .tr(),
+                ),
                 onChanged: (val) => name = val,
               ),
               TextField(
-                decoration: InputDecoration(labelText: "report.sections.resources.manpower_external.agency_name".tr()),
+                decoration: InputDecoration(
+                  labelText:
+                      "report.sections.resources.manpower_external.agency_name"
+                          .tr(),
+                ),
                 onChanged: (val) => agency = val,
               ),
               TextField(
-                decoration: InputDecoration(labelText: "report.sections.resources.manpower_external.hours_worked".tr()),
+                decoration: InputDecoration(
+                  labelText:
+                      "report.sections.resources.manpower_external.hours_worked"
+                          .tr(),
+                ),
                 keyboardType: TextInputType.number,
                 onChanged: (val) => hours = int.tryParse(val) ?? 0,
               ),
@@ -73,7 +89,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child:  Text("button.cancel".tr()),
+              child: Text("button.cancel".tr()),
             ),
             ElevatedButton(
               onPressed: () {
@@ -89,7 +105,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                   );
                 }
               },
-              child:  Text("button.add".tr()),
+              child: Text("button.add".tr()),
             ),
           ],
         );
@@ -111,7 +127,10 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title:  Text("report.sections.resources.manpower_internal.select_internal_employees".tr()),
+              title: Text(
+                "report.sections.resources.manpower_internal.select_internal_employees"
+                    .tr(),
+              ),
               content: SizedBox(
                 width: double.maxFinite,
                 child: ListView.builder(
@@ -148,7 +167,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child:  Text("button.done".tr()),
+                  child: Text("button.done".tr()),
                 ),
               ],
             );
@@ -169,18 +188,25 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title:  Text("report.sections.resources.equipment.add_equipment".tr()),
+              title: Text(
+                "report.sections.resources.equipment.add_equipment".tr(),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
                     decoration: InputDecoration(
-                      labelText: "report.sections.resources.equipment.equipment_name".tr(),
+                      labelText:
+                          "report.sections.resources.equipment.equipment_name"
+                              .tr(),
                     ),
                     onChanged: (val) => name = val,
                   ),
                   SwitchListTile(
-                    title: Text("report.sections.resources.equipment.internal_machine_title".tr()),
+                    title: Text(
+                      "report.sections.resources.equipment.internal_machine_title"
+                          .tr(),
+                    ),
                     value: isInternal,
                     onChanged: (val) {
                       setDialogState(() => isInternal = val);
@@ -189,7 +215,9 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                   if (!isInternal)
                     TextField(
                       decoration: InputDecoration(
-                        labelText: "report.sections.resources.equipment.renter_name".tr(),
+                        labelText:
+                            "report.sections.resources.equipment.renter_name"
+                                .tr(),
                       ),
                       onChanged: (val) => renter = val,
                     ),
@@ -209,7 +237,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                       renterName: isInternal ? null : renter,
                     ),
                   ),
-                  child:  Text("button.add".tr()),
+                  child: Text("button.add".tr()),
                 ),
               ],
             );
@@ -224,6 +252,100 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     }
   }
 
+  void _addTransportLog() async {
+    String selectedType = "8x4";
+    int count = 1;
+    final TextEditingController _workController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text("transport.add_title".tr()),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SegmentedButton(
+                    segments: const [
+                      ButtonSegment(value: "8x4", label: Text("8x4")),
+                      ButtonSegment(value: "6x4", label: Text("6x4")),
+                    ],
+                    selected: {selectedType},
+                    onSelectionChanged: (set) =>
+                        setDialogState(() => selectedType = set.first),
+                  ),
+                  const SizedBox(height: 15),
+                  TextField(
+                    controller: _workController,
+                    decoration: InputDecoration(
+                      labelText: "transport.work_label".tr(),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("transport.trips".tr()),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () => setDialogState(() {
+                              if (count > 1) {
+                                count--;
+                              }
+                            }),
+                            icon: const Icon(Icons.remove),
+                          ),
+                          Text(
+                            "$count",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => setDialogState(() => count++),
+                            icon: const Icon(Icons.add),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("cancel".tr()),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_workController.text.isNotEmpty) {
+                      setState(() {
+                        _formData.transportLogs = [
+                          ..._formData.transportLogs,
+                          TransportLog(
+                            type: selectedType,
+                            tripCount: count,
+                            workDescription: _workController.text.trim(),
+                          ),
+                        ];
+                      });
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text("add".tr()),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _addMaterials() async {
     final TextEditingController _controller = TextEditingController();
 
@@ -231,12 +353,13 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title:  Text("report.sections.resources.materials.add_material".tr()),
+          title: Text("report.sections.resources.materials.add_material".tr()),
           content: TextField(
             controller: _controller,
             autofocus: true,
             decoration: InputDecoration(
-              hintText: "report.sections.resources.materials.materials_hint".tr(),
+              hintText: "report.sections.resources.materials.materials_hint"
+                  .tr(),
               labelText: "report.sections.resources.materials.description".tr(),
             ),
           ),
@@ -258,7 +381,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                   Navigator.pop(context);
                 }
               },
-              child:  Text("button.add".tr()),
+              child: Text("button.add".tr()),
             ),
           ],
         );
@@ -274,6 +397,47 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
         _formData.imagePaths = [..._formData.imagePaths, safePath];
       });
     }
+  }
+
+  // Display components
+  Widget _buildTransportSection(String truckType) {
+    // Filter logs for this specific truck type
+    final logs = _formData.transportLogs
+        .where((l) => l.type == truckType)
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          truckType,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.blueGrey,
+          ),
+        ),
+        if (logs.isEmpty)
+          const Padding(
+            padding: EdgeInsets.only(left: 8.0),
+            child: Text("—", style: TextStyle(color: Colors.grey)),
+          ),
+        ...logs.map(
+          (log) => ListTile(
+            dense: true,
+            leading: const Icon(Icons.local_shipping, size: 20),
+            title: Text(log.workDescription),
+            trailing: Text(
+              "x${log.tripCount}",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            onLongPress: () => setState(
+              () => _formData.transportLogs.remove(log),
+            ), // Remove on long press
+          ),
+        ),
+        const Divider(),
+      ],
+    );
   }
 
   void _submitForm() {
@@ -341,9 +505,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                     items: WeatherCondition.values.map((weather) {
                       return DropdownMenuItem(
                         value: weather,
-                        child: Text(
-                          weather.translatedName,
-                        ),
+                        child: Text(weather.translatedName),
                       );
                     }).toList(),
                     onChanged: (newValue) {
@@ -356,7 +518,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             const Divider(height: 40),
 
             // Resources (Materials and Manpower)
-             Text(
+            Text(
               "report.sections.resources.title".tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
@@ -387,7 +549,10 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             OutlinedButton.icon(
               onPressed: _showInternalWorkerPicker,
               icon: const Icon(Icons.person_search),
-              label: Text("report.sections.resources.manpower_internal.select_internal_employees".tr()),
+              label: Text(
+                "report.sections.resources.manpower_internal.select_internal_employees"
+                    .tr(),
+              ),
             ),
             const SizedBox(height: 20),
             // External Manpower input
@@ -422,12 +587,15 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             OutlinedButton.icon(
               onPressed: _addExternalWorker,
               icon: const Icon(Icons.add),
-              label: Text("report.sections.resources.manpower_external.add_external_worker".tr()),
+              label: Text(
+                "report.sections.resources.manpower_external.add_external_worker"
+                    .tr(),
+              ),
             ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                "report.sections.resources.Equipment.title".tr(),
+                "report.sections.resources.equipment.title".tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
@@ -453,7 +621,8 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                     ),
                     subtitle: Text(
                       equipment.isInternal
-                          ? "report.sections.resources.Equipment.internal_property".tr()
+                          ? "report.sections.resources.equipment.internal_property"
+                                .tr()
                           : "Rented from: ${equipment.renterName ?? "Unknown"}",
                     ),
                     trailing: IconButton(
@@ -473,7 +642,9 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             OutlinedButton.icon(
               onPressed: _addEquipment, // Method from previous step
               icon: const Icon(Icons.add_outlined),
-              label: Text("report.sections.resources.Equipment.add_engine".tr()),
+              label: Text(
+                "report.sections.resources.equipment.add_engine".tr(),
+              ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(45),
               ),
@@ -483,7 +654,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                "report.sections.resources.Materials.title".tr(),
+                "report.sections.resources.materials.title".tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
@@ -492,7 +663,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               children: _formData.consumableMaterials.isEmpty
                   ? [
                       Text(
-                        "report.sections.resources.Materials.no_materials".tr(),
+                        "report.sections.resources.materials.no_materials".tr(),
                         style: TextStyle(
                           color: Colors.grey,
                           fontStyle: FontStyle.italic,
@@ -545,13 +716,37 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             OutlinedButton.icon(
               onPressed: _addMaterials,
               icon: const Icon(Icons.playlist_add),
-              label: Text("report.sections.resources.Materials.add_material".tr()),
+              label: Text(
+                "report.sections.resources.materials.add_material".tr(),
+              ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(45),
               ),
             ),
 
             // ========= END CONSTRUCTION MATERIALS =========
+            // ========= TRANSPORT =========
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                "Transport Logs",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+
+            _buildTransportSection("8x4"),
+            _buildTransportSection("6x4"),
+
+            OutlinedButton.icon(
+              onPressed: _addTransportLog,
+              icon: const Icon(Icons.add_road),
+              label: const Text("Log New Trip"),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(45),
+              ),
+            ),
+
+            // ========= END TRANSPORT =========
             const Divider(height: 40),
             const Text(
               "Site Photos & POs",
