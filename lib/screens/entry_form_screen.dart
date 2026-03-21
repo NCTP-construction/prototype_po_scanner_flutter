@@ -604,8 +604,8 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                 return Card(
                   elevation: 0,
                   color: equipment.isInternal
-                      ? Colors.blue.withOpacity(0.05)
-                      : Colors.orange.withOpacity(0.05),
+                      ? Colors.blue.withValues(alpha: 0.05)
+                      : Colors.orange.withValues(alpha: 0.05),
                   shape: RoundedRectangleBorder(
                     side: BorderSide(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(8),
