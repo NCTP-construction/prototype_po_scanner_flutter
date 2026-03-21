@@ -90,7 +90,6 @@ class DailyReportModel {
 
   // List of Strings (Simple)
   List<String> internalManpower;
-  List<String> internalMaterials;
   List<String> miscTools;
   List<String> miscWork;
   List<String> imagePaths;
@@ -108,7 +107,6 @@ class DailyReportModel {
     required this.author,
     this.climate = WeatherCondition.sunny, // Default
     this.internalManpower = const [],
-    this.internalMaterials = const [],
     this.miscTools = const [],
     this.miscWork = const [],
     this.externalManpower = const [],
