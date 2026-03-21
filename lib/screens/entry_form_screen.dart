@@ -726,11 +726,11 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
 
             // ========= END CONSTRUCTION MATERIALS =========
             // ========= TRANSPORT =========
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                "Transport Logs",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                "report.sections.transport.title".tr(),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
 
@@ -740,7 +740,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             OutlinedButton.icon(
               onPressed: _addTransportLog,
               icon: const Icon(Icons.add_road),
-              label: const Text("Log New Trip"),
+              label: Text("report.sections.transport.add_trip".tr()),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(45),
               ),
