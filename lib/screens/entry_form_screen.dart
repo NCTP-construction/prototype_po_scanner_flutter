@@ -38,136 +38,165 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     _formData = DailyReportModel(
       date: DateTime.now(),
       author: User(userId: "1", username: 'tifaky', fullName: "tifaky"),
-      siteName: "report.sections.resources.manpower_external.site_name".tr(),
+      siteName: "report.site_name".tr(),
     );
   }
 
-  // Helper functions for fields input
-  void _addExternalWorker() async {
-    final worker = await showDialog<ExternalWorker>(
-      context: context,
-      builder: (context) {
-        String name = '';
-        String agency = '';
-        int hours = 0;
+  void _addLaborEntry() async {
+    EmploymentType selectedType = EmploymentType.internal;
+    String? selectedStaffId;
+    String selectedName = "";
+    bool isOvertime = false;
+    double hours = 8.0;
 
-        return AlertDialog(
-          title: Text(
-            "report.sections.resources.manpower_external.add_external_worker"
-                .tr(),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min, // Shrink to fit content
-            children: [
-              TextField(
-                decoration: InputDecoration(
-                  labelText:
-                      "report.sections.resources.manpower_external.worker_name"
-                          .tr(),
-                ),
-                onChanged: (val) => name = val,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  labelText:
-                      "report.sections.resources.manpower_external.agency_name"
-                          .tr(),
-                ),
-                onChanged: (val) => agency = val,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  labelText:
-                      "report.sections.resources.manpower_external.hours_worked"
-                          .tr(),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (val) => hours = int.tryParse(val) ?? 0,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("button.cancel".tr()),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (name.isNotEmpty && agency.isNotEmpty) {
-                  // Return the Object, not just a string!
-                  Navigator.pop(
-                    context,
-                    ExternalWorker(
-                      name: name,
-                      agency: agency,
-                      hoursWorked: hours,
-                    ),
-                  );
-                }
-              },
-              child: Text("button.add".tr()),
-            ),
-          ],
-        );
-      },
-    );
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController agencyController = TextEditingController();
 
-    // If we got a valid worker object back, add it to the report
-    if (worker != null) {
-      setState(() {
-        _formData.externalManpower = [..._formData.externalManpower, worker];
-      });
-    }
-  }
+    // Simulated list of internal staff synced from Supabase/Sqflite
+    final List<Map<String, String>> internalStaffDb = [
+      {'id': 'uuid-101', 'name': 'Jean Dupont', 'role': 'Mason'},
+      {'id': 'uuid-102', 'name': 'Marie Curie', 'role': 'Foreman'},
+    ];
 
-  void _showInternalWorkerPicker() async {
     await showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text(
-                "report.sections.resources.manpower_internal.select_internal_employees"
-                    .tr(),
-              ),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _allInternalEmployees.length,
-                  itemBuilder: (context, index) {
-                    final worker = _allInternalEmployees[index];
-                    final isSelected = _formData.internalManpower.contains(
-                      worker,
-                    );
-                    return CheckboxListTile(
-                      title: Text(worker),
-                      value: isSelected,
-                      onChanged: (bool? checked) {
-                        setState(() {
-                          if (checked == true) {
-                            _formData.internalManpower = [
-                              ..._formData.internalManpower,
-                              worker,
-                            ];
-                          } else {
-                            _formData.internalManpower = _formData
-                                .internalManpower
-                                .where((name) => name != worker)
-                                .toList();
-                          }
-                        });
-                        setDialogState(() {});
-                      },
-                    );
-                  },
+              title: Text("report.sections.resources.labor.add_labor".tr()),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 1. Toggle Type
+                    SegmentedButton<EmploymentType>(
+                      segments: [
+                        ButtonSegment(
+                          value: EmploymentType.internal,
+                          label: Text(
+                            "report.sections.resources.labor.internal_employee"
+                                .tr(),
+                          ),
+                        ),
+                        ButtonSegment(
+                          value: EmploymentType.external,
+                          label: Text(
+                            "report.sections.resources.labor.external".tr(),
+                          ),
+                        ),
+                      ],
+                      selected: {selectedType},
+                      onSelectionChanged: (val) =>
+                          setDialogState(() => selectedType = val.first),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 2. Input Fields based on Type
+                    if (selectedType == EmploymentType.internal)
+                      DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText:
+                              "report.sections.resources.labor.select_employee"
+                                  .tr(),
+                        ),
+                        items: internalStaffDb
+                            .map(
+                              (s) => DropdownMenuItem(
+                                value: s['id'],
+                                child: Text(s['name']!),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) => setDialogState(() {
+                          selectedStaffId = val;
+                          selectedName = internalStaffDb.firstWhere(
+                            (e) => e['id'] == val,
+                          )['name']!;
+                        }),
+                      )
+                    else ...[
+                      TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          labelText:
+                              "report.sections.resources.labor.worker_name"
+                                  .tr(),
+                        ),
+                      ),
+                      TextField(
+                        controller: agencyController,
+                        decoration: InputDecoration(
+                          labelText:
+                              "report.sections.resources.labor.agency_name"
+                                  .tr(),
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 15),
+
+                    // 3. Hours & Overtime
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              labelText:
+                                  "report.sections.resources.labor.hours_worked"
+                                      .tr(),
+                              suffixText: "hrs",
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (val) =>
+                                hours = double.tryParse(val) ?? 8.0,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Column(
+                          children: [
+                            Text(
+                              "report.sections.resources.labor.overtime".tr(),
+                            ),
+                            Checkbox(
+                              value: isOvertime,
+                              onChanged: (val) =>
+                                  setDialogState(() => isOvertime = val!),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text("button.done".tr()),
+                  child: Text("cancel".tr()),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _formData.laborEntries = [
+                        ..._formData.laborEntries,
+                        LaborEntry(
+                          staffId: selectedStaffId,
+                          fullName: selectedType == EmploymentType.internal
+                              ? selectedName
+                              : nameController.text,
+                          type: selectedType,
+                          hoursWorked: hours,
+                          isOvertime: isOvertime,
+                          agencyName: selectedType == EmploymentType.external
+                              ? agencyController.text
+                              : null,
+                        ),
+                      ];
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: Text("add".tr()),
                 ),
               ],
             );
@@ -347,43 +376,141 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
   }
 
   void _addMaterials() async {
-    final TextEditingController _controller = TextEditingController();
+    String selectedSource = "inventory";
+    String? selectedMaterialId;
+    String selectedMaterialName = "";
+
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController quantityController = TextEditingController();
+
+    // Simulated list of materials synced from your 'materials' table in the database
+    final List<Map<String, String>> syncedInventory = [
+      {'id': 'uuid-1', 'name': 'Cement (Bags)'},
+      {'id': 'uuid-2', 'name': 'Gravel (m3)'},
+      {'id': 'uuid-3', 'name': 'Sand (m3)'},
+    ];
 
     await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text("report.sections.resources.materials.add_material".tr()),
-          content: TextField(
-            controller: _controller,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: "report.sections.resources.materials.materials_hint"
-                  .tr(),
-              labelText: "report.sections.resources.materials.description".tr(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("button.cancel".tr()),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                String name = _controller.text.trim();
-                if (name.isNotEmpty) {
-                  setState(() {
-                    _formData.consumableMaterials = [
-                      ..._formData.consumableMaterials,
-                      name,
-                    ];
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              child: Text("button.add".tr()),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(
+                "report.sections.resources.materials.add_material".tr(),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SegmentedButton<String>(
+                      segments: [
+                        ButtonSegment(
+                          value: "inventory",
+                          label: Text(
+                            "report.sections.resources.materials.stock".tr(),
+                          ),
+                        ),
+                        ButtonSegment(
+                          value: "purchase_on_site",
+                          label: Text(
+                            "report.sections.resources.materials.purchase".tr(),
+                          ),
+                        ),
+                      ],
+                      selected: {selectedSource},
+                      onSelectionChanged: (val) =>
+                          setDialogState(() => selectedSource = val.first),
+                    ),
+                    const SizedBox(height: 20),
+                    // MATERIAL NAME: Dropdown for Stock or TextField for Purchase
+                    if (selectedSource == "inventory")
+                      DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText:
+                              "report.sections.resources.materials.select_material"
+                                  .tr(),
+                        ),
+                        items: syncedInventory.map((item) {
+                          return DropdownMenuItem(
+                            value: item['id'],
+                            child: Text(item['name']!),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setDialogState(() {
+                            selectedMaterialId = val;
+                            selectedMaterialName = syncedInventory.firstWhere(
+                              (e) => e['id'] == val,
+                            )['name']!;
+                          });
+                        },
+                      )
+                    else
+                      TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          labelText:
+                              "report.sections.resources.materials.description"
+                                  .tr(),
+                          hintText:
+                              "report.sections.resources.materials.materials_hint"
+                                  .tr(),
+                        ),
+                      ),
+                    const SizedBox(height: 15),
+                    // QUANTITY INPUT
+                    TextField(
+                      controller: quantityController,
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText:
+                            "report.sections.resources.materials.quantity".tr(),
+                        suffixText: selectedSource == "inventory"
+                            ? ""
+                            : "Units",
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("button.cancel".tr()),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final String name = selectedSource == "inventory"
+                        ? selectedMaterialName
+                        : nameController.text.trim();
+                    final double? qty = double.tryParse(
+                      quantityController.text,
+                    );
+                    if (name.isNotEmpty && qty != null) {
+                      setState(() {
+                        _formData.consumableMaterials = [
+                          ..._formData.consumableMaterials,
+                          MaterialEntry(
+                            materialId: selectedSource == "inventory"
+                                ? selectedMaterialId
+                                : null,
+                            name: name,
+                            quantity: qty,
+                            source: selectedSource,
+                          ),
+                        ];
+                      });
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text("button.add".tr()),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -523,75 +650,71 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10), // Blank Divider
-            // Internal Manpower input
+            // Labor / Manpower input
             // Title
             Text(
-              "report.sections.resources.manpower_internal.title".tr(),
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10), // Blank Divider
-            // List of employees added
-            Wrap(
-              spacing: 8.0,
-              runSpacing: 4.0,
-              children: _formData.internalManpower.map((worker) {
-                return InputChip(
-                  label: Text(worker),
-                  onDeleted: () {
-                    setState(() {
-                      _formData.internalManpower.remove(worker);
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-            // Button to input internal workers
-            OutlinedButton.icon(
-              onPressed: _showInternalWorkerPicker,
-              icon: const Icon(Icons.person_search),
-              label: Text(
-                "report.sections.resources.manpower_internal.select_internal_employees"
-                    .tr(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            // External Manpower input
-            // Title
-            Text(
-              "report.sections.resources.manpower_external.title".tr(),
+              "report.sections.resources.labor.title".tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10), // Blank Divider
             // List of employees added
             Column(
-              children: _formData.externalManpower.map((worker) {
-                return ListTile(
-                  leading: const Icon(
-                    Icons.badge_outlined,
-                    color: Colors.orange,
-                  ),
-                  title: Text(worker.name),
-                  subtitle: Text("${worker.agency} • ${worker.hoursWorked}h"),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    onPressed: () {
-                      setState(() {
-                        _formData.externalManpower.remove(worker);
-                      });
-                    },
-                  ),
-                );
-              }).toList(),
+              children: _formData.laborEntries
+                  .map(
+                    (worker) => ListTile(
+                      dense: true,
+                      leading: CircleAvatar(
+                        backgroundColor: worker.type == EmploymentType.internal
+                            ? Colors.blue.shade100
+                            : Colors.orange.shade100,
+                        child: Icon(
+                          worker.type == EmploymentType.internal
+                              ? Icons.badge
+                              : Icons.engineering,
+                          color: worker.type == EmploymentType.internal
+                              ? Colors.blue
+                              : Colors.orange,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(worker.fullName),
+                      subtitle: Text(
+                        worker.type == EmploymentType.internal
+                            ? "report.sections.resources.labor.internal_employee"
+                                  .tr()
+                            : "${"report.sections.resources.labor.internal_employee".tr()}:${worker.agencyName ?? "report.sections.resources.labor.independent".tr()}",
+                      ),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "${worker.hoursWorked}h",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          if (worker.isOvertime)
+                            Text(
+                              "report.sections.resources.labor.overtime".tr(),
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                        ],
+                      ),
+                      onLongPress: () =>
+                          setState(() => _formData.laborEntries.remove(worker)),
+                    ),
+                  )
+                  .toList(),
             ),
             // The Button to input external workers
             OutlinedButton.icon(
-              onPressed: _addExternalWorker,
-              icon: const Icon(Icons.add),
-              label: Text(
-                "report.sections.resources.manpower_external.add_external_worker"
-                    .tr(),
-              ),
-            ),
+              onPressed: _addLaborEntry,
+              icon: const Icon(Icons.person_add),
+              label: Text("report.sections.resources.labor.add_labor".tr()),
+            ),Pdatab
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
@@ -643,7 +766,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               onPressed: _addEquipment, // Method from previous step
               icon: const Icon(Icons.add_outlined),
               label: Text(
-                "report.sections.resources.equipment.add_engine".tr(),
+                "report.sections.resources.equipment.add_equipment".tr(),
               ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(45),
@@ -671,42 +794,33 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                       ),
                     ]
                   : _formData.consumableMaterials.map((item) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              " • ",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                item,
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-                            // Tiny delete button for editing
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _formData.consumableMaterials = _formData
-                                      .consumableMaterials
-                                      .where((m) => m != item)
-                                      .toList();
-                                });
-                              },
-                              child: const Icon(
-                                Icons.close,
-                                size: 18,
-                                color: Colors.redAccent,
-                              ),
-                            ),
-                          ],
+                      return ListTile(
+                        dense: true,
+                        leading: Icon(
+                          item.source == 'inventory'
+                              ? Icons.warehouse
+                              : Icons.shopping_cart,
+                          size: 20,
+                          color: item.source == 'inventory'
+                              ? Colors.blue
+                              : Colors.green,
                         ),
+                        title: Text(item.name),
+                        subtitle: Text(
+                          "Source: ${item.source == 'inventory' ? 'Warehouse' : 'On-site Purchase'}",
+                        ),
+                        trailing: Text(
+                          "x${item.quantity}",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        onLongPress: () {
+                          setState(() {
+                            _formData.consumableMaterials.remove(item);
+                          });
+                        },
                       );
                     }).toList(),
             ),
@@ -730,7 +844,10 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
                 "report.sections.transport.title".tr(),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
 

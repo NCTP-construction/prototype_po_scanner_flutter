@@ -4,6 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 // Climate options
 enum WeatherCondition { sunny, mild, rainy }
 
+enum EmploymentType { internal, external }
+
 extension WeatherConditionExtension on WeatherCondition {
   String get translatedName {
     switch (this) {
@@ -49,6 +51,7 @@ class Equipment {
   });
 
   Map<String, dynamic> toJson() => {
+    'asset_id': isInternal ? null : null,
     'equipment_name': equipmentName,
     'is_internal': isInternal,
     'renter_name': renterName,
@@ -80,6 +83,52 @@ class TransportLog {
   );
 }
 
+class MaterialEntry {
+  final String? materialId;
+  final String name;
+  final double quantity;
+  final String source;
+
+  MaterialEntry({
+    this.materialId,
+    required this.name,
+    required this.quantity,
+    required this.source,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'material_id': materialId,
+    'name': name,
+    'quantity': quantity,
+    'source': source,
+  };
+}
+
+class LaborEntry {
+  final String? staffId; // The UUID from the 'staff' table
+  final String fullName; // For UI display
+  final EmploymentType type;
+  final double hoursWorked; // Matches DECIMAL(4,2) in DB
+  final bool isOvertime; // Matches BOOLEAN in DB
+  final String? agencyName;
+
+  LaborEntry({
+    this.staffId,
+    required this.fullName,
+    required this.type,
+    this.hoursWorked = 8.0,
+    this.isOvertime = false,
+    this.agencyName,
+  });
+
+  // This version matches the labor_logs table columns exactly
+  Map<String, dynamic> toJson() => {
+    'staff_id': staffId, // Links to the 'staff' table
+    'hours_worked': hoursWorked, // Matches the 'hours_worked' column
+    'is_overtime': isOvertime, // Matches the 'is_overtime' column
+  };
+}
+
 // Main Report Model
 class DailyReportModel {
   // Metadata
@@ -89,14 +138,12 @@ class DailyReportModel {
   final User author;
 
   // List of Strings (Simple)
-  List<String> internalManpower;
-  List<String> miscTools;
-  List<String> miscWork;
+  // List<String> internalManpower;
   List<String> imagePaths;
-  List<String> consumableMaterials;
+  List<MaterialEntry> consumableMaterials;
 
   // Lists of Objects (Complex)
-  List<ExternalWorker> externalManpower;
+  List<LaborEntry> laborEntries;
   List<Equipment> equipments;
 
   List<TransportLog> transportLogs;
@@ -106,10 +153,7 @@ class DailyReportModel {
     required this.siteName,
     required this.author,
     this.climate = WeatherCondition.sunny, // Default
-    this.internalManpower = const [],
-    this.miscTools = const [],
-    this.miscWork = const [],
-    this.externalManpower = const [],
+    this.laborEntries = const [],
     this.equipments = const [],
     this.consumableMaterials = const [],
     this.transportLogs = const [],
@@ -122,13 +166,12 @@ class DailyReportModel {
       'date': date.toIso8601String(),
       'author': author.toJson(),
       'climate': climate.name, // Saves as "soleil", "mitige", etc.
-      'internal_manpower': internalManpower,
-      'external_manpower': externalManpower.map((e) => e.toJson()).toList(),
+      'labor_entries': laborEntries.map((e) => e.toJson()).toList(),
       'equipments': equipments.map((e) => e.toJson()).toList(),
-      'consumable_materials': consumableMaterials,
+      'consumable_materials': consumableMaterials
+          .map((e) => e.toJson())
+          .toList(),
       'transport_logs': transportLogs.map((e) => e.toJson()).toList(),
-      'misc_tools': miscTools,
-      'misc_work': miscWork,
       'image_paths': imagePaths,
     };
   }

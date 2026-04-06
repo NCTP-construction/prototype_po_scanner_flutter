@@ -1,6 +1,5 @@
 {
     "site_list_title": "Sites constructions",
-    
     "report": {
         "new_report": "Nouveau Rapport de Chantier",
         "enter_site_name": "Entrez le nom du site",
@@ -18,16 +17,17 @@
         "sections": {
             "resources": {
                 "title": "Ressources",
-                "manpower_internal": {
-                    "title": "Main d'œuvre - Interne (employés)",
-                    "select_internal_employees": "Sélectionner les employés"
-                },
-                "manpower_external": {
-                    "title": "Main d'œuvre - Externe (sous-traitants)",
-                    "add_external_worker": "Ajouter un Employé Externe",
+                "labor": {
+                    "title": "Main d'œuvre",
+                    "add_labor": "Ajouter une entrée de main d'œuvre",
+                    "select_employee": "Sélectionner employé",
                     "worker_name": "Nom d'employé",
-                    "agency_name": "Nom d'agence",
-                    "hours_worked": "heures travailés"
+                    "agency_name": "Nom d'agence (Facultatif)",
+                    "hours_worked": "Heures travailés",
+                    "external": "Externe",
+                    "internal_employee": "Employé interne",
+                    "independent": "Independent",
+                    "overtime": "Heures supplémentaires"
                 },
                 "equipment": {
                     "title": "Équipement / Machines",
@@ -38,16 +38,15 @@
                     "unknown": "Inconnu",
                     "internal_machine_title": "Est-ce une machine interne ?",
                     "renter_name": "Nom du loueur"
-                    
                 },
                 "materials": {
                     "title": "Matériaux",
                     "add_material": "Ajouter un Matériel",
-                    "stock" : "Inventaire",
+                    "stock": "Inventaire",
                     "purchase": "Achat Direct",
                     "select_material": "Selectionner un item",
                     "quantity": "Quantité",
-                    "description" : "Description",
+                    "description": "Description",
                     "no_materials": "Aucun matériaux ajoutés.",
                     "materials_hint": "ex: Ciment, Sable, Gravier..."
                 }
@@ -55,7 +54,6 @@
             "transport": {
                 "title": "Transport",
                 "add_trip": "Enregistrer un nouveau voyage"
-
             }
         }
     },
@@ -65,14 +63,13 @@
         "save": "Enregistrer",
         "done": "Terminé"
     },
-    "messages":{
+    "messages": {
         "report_saved": "Rapport enregistré avec succès !",
         "report_save_error": "Erreur lors de l'enregistrement du rapport. Veuillez réessayer.",
         "processing_data": "Traitement des données en cours..."
     },
     "switch_lang": "Passer à l'Anglais",
     "placeholders": {
-        
         "no_sites": "Aucun sites rempli trouvés, appuyez sur + pour remplir un site."
     }
 }
