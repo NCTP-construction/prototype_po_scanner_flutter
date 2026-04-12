@@ -37,6 +37,37 @@ class DatabaseHelper {
         is_synced INTEGER DEFAULT 0
       )
     ''');
+
+    await db.execute(
+      'CREATE TABLE cache_projects (id TEXT PRIMARY KEY, name TEXT)',
+    );
+    await db.execute(
+      'CREATE TABLE cache_staff (id TEXT PRIMARY KEY, name TEXT)',
+    );
+    await db.execute(
+      'CREATE TABLE cache_materials (id TEXT PRIMARY KEY, name TEXT, stock REAL)',
+    );
+    await db.execute(
+      'CREATE TABLE cache_assets (id TEXT PRIMARY KEY, code TEXT, model TEXT)',
+    );
+  }
+
+  Future<void> saveMasterCache(
+    String table,
+    List<Map<String, dynamic>> data,
+  ) async {
+    final db = await instance.database;
+    await db.transaction((txn) async {
+      await txn.delete(table);
+      for (var item in data) {
+        await txn.insert(table, item);
+      }
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getMasterCache(String table) async {
+    final db = await instance.database;
+    return await db.query(table);
   }
 
   // Helper method to insert the form data

@@ -64,7 +64,7 @@
         "done": "Terminé"
     },
     "messages": {
-        "report_saved": "Rapport enregistré avec succès !",
+        "report_saved": "Compte rendu enregistré avec succès !",
         "report_save_error": "Erreur lors de l'enregistrement du rapport. Veuillez réessayer.",
         "processing_data": "Traitement des données en cours..."
     },

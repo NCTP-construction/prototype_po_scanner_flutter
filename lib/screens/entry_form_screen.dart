@@ -1,35 +1,33 @@
 import 'dart:io';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
+
 import 'package:prototype_po_scanner/models/daily_report_model.dart';
 import 'package:prototype_po_scanner/models/user_model.dart';
 import 'package:prototype_po_scanner/services/image_service.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:prototype_po_scanner/services/database_helper.dart';
 
 class EntryFormScreen extends StatefulWidget {
-  const EntryFormScreen({super.key});
+  final List<String>? initialImages;
+  const EntryFormScreen({super.key, this.initialImages});
 
   @override
   State<StatefulWidget> createState() => _EntryFormScreenState();
 }
 
 class _EntryFormScreenState extends State<EntryFormScreen> {
-  // Simulated database of all employees
-  final List<String> _allInternalEmployees = [
-    "Jean Dupont",
-    "Marie Curie",
-    "Pierre Gasly",
-    "Charles Leclerc",
-    "Esteban Ocon",
-    "Lucas Bernard",
-  ];
-  // List<TransportLog> _transportLogs = [];
-  // List<String> _materials = [];
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
   final ImageService _imageService = ImageService();
 
   late DailyReportModel _formData;
+
+  List<Map<String, dynamic>> _staff = [];
+  // List<Map<String, dynamic>> _materials = [];
 
   // Initialize state of form
   @override
@@ -39,7 +37,60 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
       date: DateTime.now(),
       author: User(userId: "1", username: 'tifaky', fullName: "tifaky"),
       siteName: "report.site_name".tr(),
+      imagePaths: widget.initialImages ?? [],
     );
+
+    _initAppData();
+  }
+
+  Future<void> _initAppData() async {
+    // 1. INSTANT LOAD: Get data from local SQLite cache using the generic method
+    // final p = await DatabaseHelper.instance.getMasterCache('cache_projects');
+    final s = await DatabaseHelper.instance.getMasterCache('cache_staff');
+    // final m = await DatabaseHelper.instance.getMasterCache('cache_materials');
+
+    // Update the UI immediately so the user doesn't wait
+    if (mounted) {
+      setState(() {
+        _staff = s;
+        // _materials = m;
+      });
+    }
+
+    // 2. SILENT UPDATE: Try to fetch fresh data from Supabase in the background
+    try {
+      final supabase = Supabase.instance.client;
+
+      final freshProjects = await supabase.from('projects').select('id, name');
+      final freshStaff = await supabase
+          .from('staff')
+          .select('id, full_name, employment_type');
+      final freshMaterials = await supabase
+          .from('materials')
+          .select('id, name, current_stock');
+
+      // 3. Update Local SQLite Cache using the generic save method
+      await DatabaseHelper.instance.saveMasterCache(
+        'cache_projects',
+        freshProjects,
+      );
+      await DatabaseHelper.instance.saveMasterCache('cache_staff', freshStaff);
+      await DatabaseHelper.instance.saveMasterCache(
+        'cache_materials',
+        freshMaterials,
+      );
+
+      // 4. Update UI again if the user is still on the screen
+      if (mounted) {
+        setState(() {
+          _staff = freshStaff;
+          // _materials = freshMaterials;
+        });
+      }
+    } catch (e) {
+      // If offline, this block silently fails, and the user continues using the cached data from step 1.
+      debugPrint("Offline mode: Using cached master data. Error: $e");
+    }
   }
 
   void _addLaborEntry() async {
@@ -53,10 +104,10 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     final TextEditingController agencyController = TextEditingController();
 
     // Simulated list of internal staff synced from Supabase/Sqflite
-    final List<Map<String, String>> internalStaffDb = [
-      {'id': 'uuid-101', 'name': 'Jean Dupont', 'role': 'Mason'},
-      {'id': 'uuid-102', 'name': 'Marie Curie', 'role': 'Foreman'},
-    ];
+    // final List<Map<String, String>> internalStaffDb = [
+    //   {'id': 'uuid-101', 'name': 'Jean Dupont', 'role': 'Mason'},
+    //   {'id': 'uuid-102', 'name': 'Marie Curie', 'role': 'Foreman'},
+    // ];
 
     await showDialog(
       context: context,
@@ -100,20 +151,27 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                               "report.sections.resources.labor.select_employee"
                                   .tr(),
                         ),
-                        items: internalStaffDb
-                            .map(
-                              (s) => DropdownMenuItem(
-                                value: s['id'],
-                                child: Text(s['name']!),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (val) => setDialogState(() {
-                          selectedStaffId = val;
-                          selectedName = internalStaffDb.firstWhere(
-                            (e) => e['id'] == val,
-                          )['name']!;
-                        }),
+                        items: _staff.map((s) {
+                          return DropdownMenuItem<String>(
+                            value: s['id'] as String,
+                            child: Text(s['full_name']! as String),
+                          );
+                        }).toList(),
+                        onChanged: (String? selectedId) {
+                          if (selectedId != null) {
+                            setDialogState(() {
+                              // Find the full name matching the selected UUID to display in the UI
+                              selectedName =
+                                  _staff.firstWhere(
+                                        (s) => s['id'] == selectedId,
+                                      )['full_name']
+                                      as String;
+                              selectedStaffId = selectedId;
+                            });
+                          }
+                        },
+                        validator: (value) =>
+                            value == null ? 'Please select an employee' : null,
                       )
                     else ...[
                       TextField(
@@ -567,12 +625,36 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     );
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+  void _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
+
+    try {
+      // 1. Prepare data
+      final String jsonPayload = jsonEncode(_formData.toJson());
+
+      // 2. Async operation (The "Async Gap" happens here)
+      await DatabaseHelper.instance.insertReport({
+        'project_id': _formData.siteName,
+        'report_date': _formData.date.toIso8601String(),
+        'payload': jsonPayload,
+        'is_synced': 0,
+      });
+
+      // 3. GUARD: Check if the widget is still in the tree before using context
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('messages.processing_data'.tr())));
+      ).showSnackBar(SnackBar(content: Text('messages.report_saved'.tr())));
+
+      Navigator.pop(context);
+    } catch (e) {
+      // Also guard error feedback
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -714,7 +796,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               onPressed: _addLaborEntry,
               icon: const Icon(Icons.person_add),
               label: Text("report.sections.resources.labor.add_labor".tr()),
-            ),Pdatab
+            ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
