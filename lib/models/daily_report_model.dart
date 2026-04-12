@@ -165,7 +165,10 @@ class DailyReportModel {
     return {
       'date': date.toIso8601String(),
       'author': author.toJson(),
-      'climate': climate.name, // Saves as "soleil", "mitige", etc.
+      'climate': climate.name,
+      'project_id': siteName,
+      
+      'site_name': siteName,
       'labor_entries': laborEntries.map((e) => e.toJson()).toList(),
       'equipments': equipments.map((e) => e.toJson()).toList(),
       'consumable_materials': consumableMaterials

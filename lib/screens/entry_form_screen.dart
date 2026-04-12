@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'dart:convert';
+
 import 'package:prototype_po_scanner/models/daily_report_model.dart';
 import 'package:prototype_po_scanner/models/user_model.dart';
 import 'package:prototype_po_scanner/services/image_service.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:prototype_po_scanner/services/database_helper.dart';
 
 class EntryFormScreen extends StatefulWidget {
   const EntryFormScreen({super.key});
@@ -15,14 +18,6 @@ class EntryFormScreen extends StatefulWidget {
 
 class _EntryFormScreenState extends State<EntryFormScreen> {
   // Simulated database of all employees
-  final List<String> _allInternalEmployees = [
-    "Jean Dupont",
-    "Marie Curie",
-    "Pierre Gasly",
-    "Charles Leclerc",
-    "Esteban Ocon",
-    "Lucas Bernard",
-  ];
   // List<TransportLog> _transportLogs = [];
   // List<String> _materials = [];
   final _formKey = GlobalKey<FormState>();
@@ -567,12 +562,36 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     );
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+  void _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
+
+    try {
+      // 1. Prepare data
+      final String jsonPayload = jsonEncode(_formData.toJson());
+
+      // 2. Async operation (The "Async Gap" happens here)
+      await DatabaseHelper.instance.insertReport({
+        'project_id': _formData.siteName,
+        'report_date': _formData.date.toIso8601String(),
+        'payload': jsonPayload,
+        'is_synced': 0,
+      });
+
+      // 3. GUARD: Check if the widget is still in the tree before using context
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('messages.processing_data'.tr())));
+      ).showSnackBar(SnackBar(content: Text('messages.report_saved'.tr())));
+
+      Navigator.pop(context);
+    } catch (e) {
+      // Also guard error feedback
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -714,7 +733,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               onPressed: _addLaborEntry,
               icon: const Icon(Icons.person_add),
               label: Text("report.sections.resources.labor.add_labor".tr()),
-            ),Pdatab
+            ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
