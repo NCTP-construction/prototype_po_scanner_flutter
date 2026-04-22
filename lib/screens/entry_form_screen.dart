@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide User;
+import 'dart:convert';
 
 import 'package:prototype_po_scanner/models/daily_report_model.dart';
 import 'package:prototype_po_scanner/models/user_model.dart';
@@ -20,6 +21,10 @@ class EntryFormScreen extends StatefulWidget {
 }
 
 class _EntryFormScreenState extends State<EntryFormScreen> {
+  // Simulated database of all employees
+  // List<TransportLog> _transportLogs = [];
+  // List<String> _materials = [];
+
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
   final ImageService _imageService = ImageService();
