@@ -42,13 +42,13 @@ class DatabaseHelper {
       'CREATE TABLE cache_projects (id TEXT PRIMARY KEY, name TEXT)',
     );
     await db.execute(
-      'CREATE TABLE cache_staff (id TEXT PRIMARY KEY, name TEXT)',
+      'CREATE TABLE cache_staff (id TEXT PRIMARY KEY, full_name TEXT, employment_type TEXT)',
     );
     await db.execute(
-      'CREATE TABLE cache_materials (id TEXT PRIMARY KEY, name TEXT, stock REAL)',
+      'CREATE TABLE cache_materials (id TEXT PRIMARY KEY, name TEXT, current_stock REAL)',
     );
     await db.execute(
-      'CREATE TABLE cache_assets (id TEXT PRIMARY KEY, code TEXT, model TEXT)',
+      'CREATE TABLE cache_assets (id TEXT PRIMARY KEY, model TEXT, is_internal INTEGER, renter_name TEXT)',
     );
   }
 
