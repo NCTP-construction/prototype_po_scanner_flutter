@@ -166,7 +166,7 @@ class DailyReportModel {
       'author': author.toJson(),
       'climate': climate.name,
       'project_id': siteName,
-      
+
       'site_name': siteName,
       'labor_entries': laborEntries.map((e) => e.toJson()).toList(),
       'equipments': equipments.map((e) => e.toJson()).toList(),
