@@ -23,7 +23,6 @@ class EntryFormScreen extends StatefulWidget {
 class _EntryFormScreenState extends State<EntryFormScreen> {
   // Simulated database of all employees
   // List<TransportLog> _transportLogs = [];
-  // List<String> _materials = [];
 
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
@@ -32,7 +31,8 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
   late DailyReportModel _formData;
 
   List<Map<String, dynamic>> _staff = [];
-  // List<Map<String, dynamic>> _materials = [];
+  List<Map<String, dynamic>> _materials = [];
+  List<Map<String, dynamic>> _equipments = [];
 
   // Initialize state of form
   @override
@@ -280,13 +280,17 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
   }
 
   void _addEquipment() async {
+    String? selectedEquipmentId;
+    String selectedEquipmentName = "";
+    bool isInternal = true;
+    String renter = '';
+
+    final TextEditingController renterController = TextEditingController();
+    final TextEditingController nameController = TextEditingController();
+
     final result = await showDialog<Equipment>(
       context: context,
       builder: (context) {
-        String name = '';
-        bool isInternal = true;
-        String renter = '';
-
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
@@ -296,14 +300,6 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText:
-                          "report.sections.resources.equipment.equipment_name"
-                              .tr(),
-                    ),
-                    onChanged: (val) => name = val,
-                  ),
                   SwitchListTile(
                     title: Text(
                       "report.sections.resources.equipment.internal_machine_title"
@@ -311,18 +307,71 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                     ),
                     value: isInternal,
                     onChanged: (val) {
-                      setDialogState(() => isInternal = val);
+                      setDialogState(() {
+                        isInternal = val;
+                        // Reset selections when toggling
+                        selectedEquipmentId = null;
+                        selectedEquipmentName = '';
+                        nameController.clear();
+                        renterController.clear();
+                      });
                     },
                   ),
-                  if (!isInternal)
+                  const SizedBox(height: 8),
+
+                  if (isInternal)
+                    // Internal: pick from company asset DB
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        labelText:
+                            "report.sections.resources.equipment.select_equipment"
+                                .tr(),
+                      ),
+                      value: selectedEquipmentId,
+                      items: _equipments.map((e) {
+                        return DropdownMenuItem<String>(
+                          value: e['id'] as String,
+                          child: Text(e['model'] as String),
+                        );
+                      }).toList(),
+                      onChanged: (String? selectedId) {
+                        if (selectedId != null) {
+                          final match = _equipments.firstWhere(
+                            (e) => e['id'] == selectedId,
+                          );
+                          setDialogState(() {
+                            selectedEquipmentId = selectedId;
+                            selectedEquipmentName = match['model'] as String;
+                          });
+                        }
+                      },
+                    )
+                  else ...[
+                    // External: free-text name + renter
                     TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText:
+                            "report.sections.resources.equipment.equipment_name"
+                                .tr(),
+                      ),
+                      onChanged: (val) {
+                        setDialogState(() => selectedEquipmentName = val);
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: renterController,
                       decoration: InputDecoration(
                         labelText:
                             "report.sections.resources.equipment.renter_name"
                                 .tr(),
                       ),
-                      onChanged: (val) => renter = val,
+                      onChanged: (val) {
+                        setDialogState(() => renter = val);
+                      },
                     ),
+                  ],
                 ],
               ),
               actions: [
@@ -331,14 +380,16 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                   child: Text("button.cancel".tr()),
                 ),
                 ElevatedButton(
-                  onPressed: () => Navigator.pop(
-                    context,
-                    Equipment(
-                      equipmentName: name,
-                      isInternal: isInternal,
-                      renterName: isInternal ? null : renter,
-                    ),
-                  ),
+                  onPressed: selectedEquipmentName.isEmpty
+                      ? null
+                      : () => Navigator.pop(
+                          context,
+                          Equipment(
+                            equipmentName: selectedEquipmentName,
+                            isInternal: isInternal,
+                            renterName: isInternal ? null : renter,
+                          ),
+                        ),
                   child: Text("button.add".tr()),
                 ),
               ],
@@ -347,6 +398,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
         );
       },
     );
+
     if (result != null) {
       setState(() {
         _formData.equipments = [..._formData.equipments, result];
@@ -497,16 +549,16 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                               "report.sections.resources.materials.select_material"
                                   .tr(),
                         ),
-                        items: syncedInventory.map((item) {
-                          return DropdownMenuItem(
+                        items: _materials.map((item) {
+                          return DropdownMenuItem<String>(
                             value: item['id'],
-                            child: Text(item['name']!),
+                            child: Text(item['name']! as String),
                           );
                         }).toList(),
                         onChanged: (val) {
                           setDialogState(() {
                             selectedMaterialId = val;
-                            selectedMaterialName = syncedInventory.firstWhere(
+                            selectedMaterialName = _materials.firstWhere(
                               (e) => e['id'] == val,
                             )['name']!;
                           });
