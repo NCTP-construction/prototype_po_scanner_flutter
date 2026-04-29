@@ -52,13 +52,15 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     // 1. INSTANT LOAD: Get data from local SQLite cache using the generic method
     // final p = await DatabaseHelper.instance.getMasterCache('cache_projects');
     final s = await DatabaseHelper.instance.getMasterCache('cache_staff');
-    // final m = await DatabaseHelper.instance.getMasterCache('cache_materials');
+    final m = await DatabaseHelper.instance.getMasterCache('cache_materials');
+    final e = await DatabaseHelper.instance.getMasterCache('cache_assets');
 
     // Update the UI immediately so the user doesn't wait
     if (mounted) {
       setState(() {
         _staff = s;
-        // _materials = m;
+        _materials = m;
+        _equipments = e;
       });
     }
 
@@ -73,6 +75,9 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
       final freshMaterials = await supabase
           .from('materials')
           .select('id, name, current_stock');
+      final freshEquipments = await supabase
+          .from('assets')
+          .select('id, model, is_internal, renter_name');
 
       // 3. Update Local SQLite Cache using the generic save method
       await DatabaseHelper.instance.saveMasterCache(
@@ -84,12 +89,17 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
         'cache_materials',
         freshMaterials,
       );
+      await DatabaseHelper.instance.saveMasterCache(
+        'cache_assets',
+        freshEquipments,
+      );
 
       // 4. Update UI again if the user is still on the screen
       if (mounted) {
         setState(() {
           _staff = freshStaff;
-          // _materials = freshMaterials;
+          _materials = freshMaterials;
+          _equipments = freshEquipments;
         });
       }
     } catch (e) {
@@ -445,13 +455,6 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
 
     final TextEditingController nameController = TextEditingController();
     final TextEditingController quantityController = TextEditingController();
-
-    // Simulated list of materials synced from your 'materials' table in the database
-    final List<Map<String, String>> syncedInventory = [
-      {'id': 'uuid-1', 'name': 'Cement (Bags)'},
-      {'id': 'uuid-2', 'name': 'Gravel (m3)'},
-      {'id': 'uuid-3', 'name': 'Sand (m3)'},
-    ];
 
     await showDialog(
       context: context,
